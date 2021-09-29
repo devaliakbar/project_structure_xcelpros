@@ -1,5 +1,7 @@
 class NetworkUtils {
   Future<Map<String, dynamic>> getNetworkResponse() async {
-    return {"name": "NETWORK DATA"};
+    await Future.delayed(const Duration(milliseconds: 1000));
+
+    return {"name": "NETWORK DATA LOADED"};
   }
 }

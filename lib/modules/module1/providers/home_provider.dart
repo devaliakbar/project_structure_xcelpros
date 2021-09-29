@@ -6,7 +6,7 @@ import 'package:project_structure_xcelpros/modules/module1/repositories/module1_
 class HomeProvider extends ChangeNotifier {
   final Module1Repository _module1repository;
 
-  DataModel? dataModel;
+  DataModel? dataModel = DataModel(name: "Initial State");
 
   String? errorMessage;
 
@@ -14,6 +14,9 @@ class HomeProvider extends ChangeNotifier {
       : _module1repository = module1repository;
 
   Future<void> getNetworkData() async {
+    dataModel = null;
+    notifyListeners();
+
     final Either<String, DataModel> result =
         await _module1repository.getNetworkData();
 
@@ -27,6 +30,9 @@ class HomeProvider extends ChangeNotifier {
   }
 
   Future<void> getLocalData() async {
+    dataModel = null;
+    notifyListeners();
+
     final Either<String, DataModel> result =
         await _module1repository.getLocalData();
 
