@@ -1,61 +1,60 @@
-import 'package:done_it/feature/setting/domain/usecases/change_app_theme_mode.dart';
-import 'package:done_it/feature/todo/data/datasources/todo_local_data_source.dart';
-import 'package:done_it/feature/todo/data/respositories/todo_repository_impl.dart';
-import 'package:done_it/feature/todo/domain/repositories/todo_repository.dart';
-import 'package:done_it/feature/todo/domain/usecases/add_todo.dart';
-import 'package:done_it/feature/todo/domain/usecases/get_all_todo.dart';
-import 'package:done_it/feature/todo/domain/usecases/get_todo.dart';
-import 'package:done_it/feature/todo/presentation/blocs/todo/todo_bloc.dart';
-import 'package:done_it/feature/todo/presentation/blocs/todo_form/todo_form_bloc.dart';
+import 'package:data_connection_checker/data_connection_checker.dart';
 import 'package:get_it/get_it.dart';
+import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 
-import 'feature/setting/data/datasources/setting_local_data_source.dart';
-import 'feature/setting/data/respositories/setting_repository_impl.dart';
-import 'feature/setting/domain/repositories/setting_repository.dart';
-import 'feature/setting/domain/usecases/get_setting.dart';
-import 'feature/setting/presentation/blocs/setting/setting_bloc.dart';
+import 'core/network/network_info.dart';
+import 'core/util/input_converter.dart';
+import 'features/number_trivia/data/datasources/number_trivia_local_data_source.dart';
+import 'features/number_trivia/data/datasources/number_trivia_remote_data_source.dart';
+import 'features/number_trivia/data/repositories/number_trivia_repository_impl.dart';
+import 'features/number_trivia/domain/repositories/number_trivia_repository.dart';
+import 'features/number_trivia/domain/usecases/get_concrete_number_trivia.dart';
+import 'features/number_trivia/domain/usecases/get_random_number_trivia.dart';
+import 'features/number_trivia/presentation/bloc/number_trivia_bloc.dart';
 
 final sl = GetIt.instance;
 
 Future<void> init() async {
   //! Features - Number Trivia
   // Bloc
-
-  sl.registerFactory<SettingBloc>(
-        () => SettingBloc(getSetting: sl(), changeAppThemeMode: sl()),
-  );
-  sl.registerFactory<TodoFormBloc>(
-        () => TodoFormBloc(addTodo: sl()),
-  );
-  sl.registerFactory<TodoBloc>(
-        () => TodoBloc(
-      getAllTodo: sl(),
+  sl.registerFactory(
+    () => NumberTriviaBloc(
+      concrete: sl(),
+      inputConverter: sl(),
+      random: sl(),
     ),
   );
 
   // Use cases
-  sl.registerLazySingleton(() => GetSetting(sl()));
-  sl.registerLazySingleton(() => ChangeAppThemeMode(sl()));
-  sl.registerLazySingleton(() => GetTodo(sl()));
-  sl.registerLazySingleton(() => GetAllTodo(sl()));
-  sl.registerLazySingleton(() => AddTodo(sl()));
+  sl.registerLazySingleton(() => GetConcreteNumberTrivia(sl()));
+  sl.registerLazySingleton(() => GetRandomNumberTrivia(sl()));
 
   // Repository
-  sl.registerLazySingleton<SettingRepository>(
-        () => SettingRepositoryImpl(settingLocalDataSource: sl()),
-  );
-  sl.registerLazySingleton<TodoRepository>(
-        () => TodoRepositoryImpl(todoLocalDataSource: sl()),
+  sl.registerLazySingleton<NumberTriviaRepository>(
+    () => NumberTriviaRepositoryImpl(
+      localDataSource: sl(),
+      networkInfo: sl(),
+      remoteDataSource: sl(),
+    ),
   );
 
   // Data sources
-  sl.registerLazySingleton<SettingLocalDataSource>(
-          () => SettingLocalDataSourceImpl());
+  sl.registerLazySingleton<NumberTriviaRemoteDataSource>(
+    () => NumberTriviaRemoteDataSourceImpl(client: sl()),
+  );
 
-  sl.registerLazySingleton<TodoLocalDataSource>(
-          () => TodoLocalDataSourceImpl());
+  sl.registerLazySingleton<NumberTriviaLocalDataSource>(
+    () => NumberTriviaLocalDataSourceImpl(sharedPreferences: sl()),
+  );
 
   //! Core
+  sl.registerLazySingleton(() => InputConverter());
+  sl.registerLazySingleton<NetworkInfo>(() => NetworkInfoImpl(sl()));
 
   //! External
+  final sharedPreferences = await SharedPreferences.getInstance();
+  sl.registerLazySingleton(() => sharedPreferences);
+  sl.registerLazySingleton(() => http.Client());
+  sl.registerLazySingleton(() => DataConnectionChecker());
 }
