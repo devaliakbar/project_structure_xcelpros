@@ -12,6 +12,7 @@ void main() {
   final MockLocalStorage mockLocalStorage = MockLocalStorage();
   final MockNetworkUtils mockNetworkUtils = MockNetworkUtils();
 
+  // ignore: unused_local_variable
   final Module1Repository module1repository = Module1Repository(
       localStorage: mockLocalStorage, networkUtils: mockNetworkUtils);
 

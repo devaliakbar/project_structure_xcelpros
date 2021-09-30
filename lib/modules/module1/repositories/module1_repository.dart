@@ -3,29 +3,13 @@ import 'package:project_structure_xcelpros/core/local_storage.dart';
 import 'package:project_structure_xcelpros/core/network_utils.dart';
 import 'package:project_structure_xcelpros/modules/module1/models/data_model.dart';
 
-class Module1Repository {
-  final NetworkUtils _networkUtils;
-  final LocalStorage _localStorage;
+part 'module1_repository_base.dart';
+part './sub/local_repository.dart';
+part './sub/network_repository.dart';
 
+class Module1Repository extends _Module1RepositoryBase
+    with _NetworkRepository, _LocalRepository {
   Module1Repository(
       {required LocalStorage localStorage, required NetworkUtils networkUtils})
-      : _networkUtils = networkUtils,
-        _localStorage = localStorage;
-
-  Future<Either<String, DataModel>> getNetworkData() async {
-    try {
-      return Right(
-          DataModel.fromJson(await _networkUtils.getNetworkResponse()));
-    } catch (_) {
-      return const Left("FAILED REASON");
-    }
-  }
-
-  Future<Either<String, DataModel>> getLocalData() async {
-    try {
-      return Right(DataModel.fromJson(await _localStorage.getLocal()));
-    } catch (_) {
-      return const Left("FAILED REASON");
-    }
-  }
+      : super(localStorage: localStorage, networkUtils: networkUtils);
 }
